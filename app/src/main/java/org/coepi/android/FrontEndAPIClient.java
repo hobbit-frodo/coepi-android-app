@@ -50,7 +50,7 @@ public class FrontEndAPIClient {
                 rs ="That didn't work!";
             }
         });
-        
+
         /*With HttpClient
         HttpGet postSymptomsAndContactsRequest = new HttpPost(url_api);
         //Set the API media type in http content-type header
