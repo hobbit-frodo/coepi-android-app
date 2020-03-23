@@ -10,7 +10,14 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import org.coepi.android.localstorage.GeoTime;
+import org.coepi.android.localstorage.RoomLocalStorage;
+import org.coepi.android.localstorage.room.Contact;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 public class FirstFragment extends Fragment {
@@ -21,11 +28,21 @@ public class FirstFragment extends Fragment {
             Bundle savedInstanceState
     ) {
         // Inflate the layout for this fragment
-        uuIDs.add("ax");
+        RoomLocalStorage storage = new RoomLocalStorage(getContext());
+        /* sample
+        GeoTime gt = new GeoTime();
+        gt.timestamp ="2020032223";
+        gt.geohash="01230123";
+        storage.putContactInfo( "Ax", gt);
+        */
         return inflater.inflate(R.layout.fragment_first, container, false);
     }
 
-    private static Vector<String> uuIDs = new Vector<String>();
+    private static HashMap<String,GeoTime> uuIDstaic = new HashMap<String,GeoTime>();
+
+    public void appendUUID( String uuid, GeoTime geotime ){
+        uuIDstaic.put(uuid,geotime);
+    }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -34,8 +51,16 @@ public class FirstFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 String rnd = String.valueOf(Math.random());
-                uuIDs.add(rnd);
-                String echo = "added:"+rnd;
+
+                GeoTime gt = new GeoTime();
+                gt.timestamp = new Date().toString();
+                gt.geohash="";
+
+                //uuIDs.put(date, rnd);
+                RoomLocalStorage storage = new RoomLocalStorage(getContext());
+                storage.putContactInfo(rnd, gt);
+
+                String echo = "added:"+rnd+","+gt;
                 Toast toast_echo = Toast.makeText( view.getContext(), echo, Toast.LENGTH_SHORT);
                 toast_echo.show();
             }
@@ -46,9 +71,9 @@ public class FirstFragment extends Fragment {
             public void onClick(View view) {
                 FrontEndAPIClient client = new FrontEndAPIClient(view.getContext());
 
-                String echo = client.sendContactAndSymptoms("SlNPTkJMT0I6c2V2ZXJlIGZldmVyLGNvdWdoaW5n", uuIDs );
-                Toast toast_echo = Toast.makeText( view.getContext(), echo, Toast.LENGTH_SHORT);
-                toast_echo.show();
+                RoomLocalStorage storage = new RoomLocalStorage(getContext());
+                List<Contact> uuIDs = storage.listContacts(null, null);
+                client.sendContactAndSymptoms("SlNPTkJMT0I6c2V2ZXJlIGZldmVyLGNvdWdoaW5n", uuIDs );
             }
         });
 
